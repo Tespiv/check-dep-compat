@@ -29,5 +29,13 @@
   "dependencies": {
     "chalk": "^5.4.1",
     "semver": "^7.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tespiv/check-dep-compat"
+  },
+  "homepage": "https://github.com/Tespiv/check-dep-compat",
+  "bugs": {
+    "url": "https://github.com/Tespiv/check-dep-compat"
   }
 }
