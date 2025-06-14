@@ -1,0 +1,33 @@
+{
+  "name": "check-dep-compat",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "description": "Checking compatibility of dependencies and peerDependencies into the project",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "check-dep-compat": "./dist/index.js"
+  },
+  "keywords": [
+    "dependency",
+    "checker",
+    "peerDependencies",
+    "angular",
+    "semver"
+  ],
+  "author": "Dmitry Mamaev",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "@types/semver": "^7.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "semver": "^7.7.2"
+  }
+}
