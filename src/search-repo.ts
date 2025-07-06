@@ -1,9 +1,4 @@
-import getLatestVersion from './latest-version.js';
-import {
-  TPackageSuggestionDTO,
-  TPackageSuggestionVersion,
-  TRegistryDTO,
-} from './types/types';
+import { TPackageSuggestionVersion, TRegistryDTO } from './types/types';
 
 export default async function searchRepo(
   repo: string
@@ -15,11 +10,9 @@ export default async function searchRepo(
     if (!response) {
       return null;
     }
-    //console.log('dwdwdwdwdwdw22222', url);
-    const r: TRegistryDTO = await response.json();
-    //console.log('dwdwdwdwdwdw22222', r);
+    const result: TRegistryDTO = await response.json();
 
-    const latestVersion = r['dist-tags'].latest;
+    const latestVersion = result['dist-tags'].latest;
     return {
       version: latestVersion,
     };

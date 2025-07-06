@@ -24,13 +24,6 @@ export type TItem = {
   };
 };
 
-export type TPackageSuggestionDTO = {
-  name: string;
-  full_name: string;
-  description: string;
-  html_url: string;
-};
-
 export type TRegistryDTO = {
   name: string;
   'dist-tags': {
@@ -40,14 +33,8 @@ export type TRegistryDTO = {
   homepage: string;
 };
 
-export type TResultsSearch = {
-  items: TPackageSuggestionDTO[];
-};
-
-export type TResultSearch = {
-  items: TPackageSuggestionDTO;
-};
-
-export type TVersion = {
-  name: string;
+export type TInfoConflict = {
+  peerName: string;
+  requiredRange: string;
+  actualVersion: string;
 };

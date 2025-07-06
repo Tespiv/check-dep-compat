@@ -5,15 +5,12 @@ import chalk from 'chalk';
 import semver from 'semver';
 import searchAlternatives from './search-alternatives.js';
 import searchRepo from './search-repo.js';
-
+import { TInfoConflict } from './types/types.js';
+import { printConflictsTable } from './utils/print-conflicts-table.js';
+import Table from 'cli-table3';
 type PackageJson = {
   dependencies?: Record<string, string>;
 };
-
-function getUnscopedPackageName(pkgName: string): string {
-  const parts = pkgName.split('/');
-  return parts.length === 2 ? parts[1] : pkgName;
-}
 
 const ROOT = process.cwd();
 const rootPkgPath = path.join(ROOT, 'package.json');
@@ -29,7 +26,8 @@ const rootDeps = rootPkg.dependencies || {};
 
 console.log(chalk.blue('🔍 Checking the peerDependencies of all packets...'));
 
-let hasConflicts = false;
+let hasConflicts: boolean = false;
+const handledPackages = new Set<string>();
 
 (async () => {
   for (const [pkgName, rootVersion] of Object.entries(rootDeps)) {
@@ -45,6 +43,10 @@ let hasConflicts = false;
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'));
     const peerDeps: Record<string, string> = pkgJson.peerDependencies || {};
 
+    const majorConflicts: TInfoConflict[] = [];
+
+    const otherConflicts: TInfoConflict[] = [];
+
     for (const [peerName, requiredRange] of Object.entries(peerDeps)) {
       const actualVersion = rootDeps[peerName];
       if (!actualVersion) continue;
@@ -58,46 +60,69 @@ let hasConflicts = false;
         if (!requiredVer) continue;
 
         if (requiredVer.major !== minActual.major) {
-          console.log(
-            chalk.red(
-              `❌ MAJOR conflict: "${pkgName}" requires "${peerName}@${requiredRange}", and you have "${actualVersion}"`
-            )
-          );
+          majorConflicts.push({ peerName, requiredRange, actualVersion });
+
+          hasConflicts = true;
+
           const latestVersion = await searchRepo(pkgName);
-          // console.log('latestVersion', latestVersion?.version?.split('.')[0]);
-          // console.log('requiredRange', minActual.major);
           if (
             `${minActual.major}` === `${latestVersion?.version?.split('.')[0]}`
           ) {
-            //console.log('ffff', requiredRange, actualVersion);
             console.log(
-              `ты можешь обновиться до ${latestVersion?.version} ${pkgName}`
+              `You can upgrade to ${latestVersion?.version} ${pkgName}`
             );
-          } else {
-            const resultSearch = await searchAlternatives(pkgName);
-            if (resultSearch.length > 0) {
-              console.log(chalk.cyan('🔎 Возможные альтернативы:'));
-              resultSearch.forEach((s) => {
-                if (s.version) {
-                  console.log(`📦 ${s.name}@${s.version} — ${s.description}`);
-                  console.log(`👉 ${s.npm}`);
-                } else {
-                  console.log('Without info about latest version');
-                }
-              });
-            }
           }
-
-          hasConflicts = true;
         } else {
-          console.log(
-            chalk.yellow(
-              `⚠️ Possible incompatibility: "${pkgName}" expects "${peerName}@${requiredRange}", you have "${actualVersion}"`
-            )
-          );
+          otherConflicts.push({ peerName, requiredRange, actualVersion });
+
           hasConflicts = true;
         }
       }
+    }
+
+    if (majorConflicts.length > 0 || otherConflicts.length > 0) {
+      console.log('');
+      console.log(chalk.bold(`📦 ${pkgName}`));
+    }
+
+    if (majorConflicts.length > 0) {
+      printConflictsTable('❌ MAJOR conflicts:', chalk.red, majorConflicts);
+
+      if (!handledPackages.has(pkgName)) {
+        const resultSearch = await searchAlternatives(pkgName);
+        if (resultSearch.length > 0) {
+          console.log(chalk.cyan('\n🔎 Possible alternatives:'));
+
+          const table = new Table({
+            colWidths: [100],
+            wordWrap: true,
+            style: { head: [], border: [] },
+          });
+
+          resultSearch.forEach((s) => {
+            const versionStr = s.version ? `@${s.version}` : '';
+            const block = [
+              chalk.yellow(`📦 ${s.name}${versionStr}`),
+              chalk.gray(`Description: ${s.description || 'No description'}`),
+              chalk.green(`Link:    👉 ${s.npm}`),
+            ].join('\n');
+
+            table.push([block]);
+          });
+
+          console.log(table.toString());
+        }
+      }
+
+      handledPackages.add(pkgName);
+    }
+
+    if (otherConflicts.length > 0) {
+      printConflictsTable(
+        '⚠️ Possible incompatibilities:',
+        chalk.yellow,
+        otherConflicts
+      );
     }
   }
 
