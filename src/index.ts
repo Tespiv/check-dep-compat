@@ -60,8 +60,6 @@ const handledPackages = new Set<string>();
         if (!requiredVer) continue;
 
         if (requiredVer.major !== minActual.major) {
-          majorConflicts.push({ peerName, requiredRange, actualVersion });
-
           hasConflicts = true;
 
           const latestVersion = await searchRepo(pkgName);
@@ -71,6 +69,8 @@ const handledPackages = new Set<string>();
             console.log(
               `You can upgrade to ${latestVersion?.version} ${pkgName}`
             );
+          } else {
+            majorConflicts.push({ peerName, requiredRange, actualVersion });
           }
         } else {
           otherConflicts.push({ peerName, requiredRange, actualVersion });
