@@ -1,8 +1,8 @@
-# 📦 check-dep-compat
+# check-dep-compat
 
 > 🔍 CLI tool to check `peerDependencies` compatibility, detect version mismatches, and suggest alternative packages.
 
-## ✨ Features
+## Features
 
 - 🔎 **Scans all installed dependencies** for peer requirements.
 - ❌ Highlights **major version conflicts** (e.g. Angular 18 required, 19 installed).
@@ -12,7 +12,7 @@
 
 ---
 
-## 📦 Installation
+## Installation
 
 Install globally:
 

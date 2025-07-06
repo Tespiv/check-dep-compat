@@ -1,6 +1,6 @@
 {
   "name": "check-dep-compat",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "dist/index.js",
   "type": "module",
   "description": "Checking compatibility of dependencies and peerDependencies into the project",
